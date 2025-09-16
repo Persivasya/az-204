@@ -42,7 +42,6 @@
                         <os>linux</os>
                         <javaVersion>17</javaVersion>
                     </runtime>
-                    <appName>azfunction</appName>
                 </configuration>
                 <executions>
                     <execution>
