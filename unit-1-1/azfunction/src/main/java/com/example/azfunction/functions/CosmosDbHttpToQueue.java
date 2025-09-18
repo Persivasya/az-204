@@ -1,4 +1,4 @@
-package com.example.azfunction;
+package com.example.azfunction.functions;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -16,31 +16,20 @@ import com.microsoft.azure.functions.annotation.HttpTrigger;
 public class CosmosDbHttpToQueue {
     @FunctionName("CosmosDbHttpToQueue")
     public HttpResponseMessage run(
-        @HttpTrigger(
-            name = "req",
-            methods = {HttpMethod.GET},
-            authLevel = AuthorizationLevel.ANONYMOUS,
-            route = "document"
-        )
-        HttpRequestMessage<Optional<String>> request,
-        @CosmosDBInput(
-            name = "items",
-            databaseName = "function-1",
-            containerName = "test",
-            connection = "CosmosDBConnection",
-            partitionKey = "{id}") List<Document> input,
-        final ExecutionContext context
-    ) {
+            @HttpTrigger(name = "req", methods = {
+                    HttpMethod.GET }, authLevel = AuthorizationLevel.ANONYMOUS, route = "document") HttpRequestMessage<Optional<String>> request,
+            @CosmosDBInput(name = "items", databaseName = "function-1", containerName = "test", connection = "CosmosDBConnection", partitionKey = "{id}") List<Document> input,
+            final ExecutionContext context) {
         context.getLogger().info("Java Cosmos DB trigger function executed at: " + LocalDateTime.now());
         if (input.isEmpty()) {
             return request.createResponseBuilder(HttpStatus.NOT_FOUND)
-                          .body("Document not found.")
-                          .build();
+                    .body("Document not found.")
+                    .build();
         } else {
             return request.createResponseBuilder(HttpStatus.OK)
-                          .header("Content-Type", "application/json")
-                          .body(input)
-                          .build();
+                    .header("Content-Type", "application/json")
+                    .body(input)
+                    .build();
         }
     }
 }

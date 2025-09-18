@@ -1,4 +1,4 @@
-package com.example.azfunction;
+package com.example.azfunction.functions;
 
 public class Document {
     private String id;

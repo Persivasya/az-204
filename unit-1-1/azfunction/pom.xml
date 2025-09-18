@@ -26,6 +26,12 @@
             <artifactId>azure-functions-maven-plugin</artifactId>
             <version>1.39.0</version>
         </dependency>
+        
+        <dependency>
+            <groupId>com.microsoft</groupId>
+            <artifactId>durabletask-azure-functions</artifactId>
+            <version>1.6.0</version>
+        </dependency>
     </dependencies>
 
     <build>

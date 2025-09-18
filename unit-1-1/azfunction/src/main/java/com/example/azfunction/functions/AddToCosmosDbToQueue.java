@@ -1,4 +1,4 @@
-package com.example.azfunction;
+package com.example.azfunction.functions;
 
 import com.microsoft.azure.functions.ExecutionContext;
 import com.microsoft.azure.functions.HttpMethod;
@@ -17,18 +17,10 @@ import java.util.Optional;
 public class AddToCosmosDbToQueue {
     @FunctionName("AddToCosmosDbToQueue")
     public HttpResponseMessage run(
-        @HttpTrigger(
-            name = "req",
-            methods = {HttpMethod.POST},
-            authLevel = AuthorizationLevel.ANONYMOUS,
-            route = "document") HttpRequestMessage<Optional<String>> request,
-        @CosmosDBOutput(
-            name = "document",
-            databaseName = "function-1",
-            containerName = "test",
-            connection = "CosmosDBConnection") OutputBinding<Document> output,
-        final ExecutionContext context
-    ) {
+            @HttpTrigger(name = "req", methods = {
+                    HttpMethod.POST }, authLevel = AuthorizationLevel.ANONYMOUS, route = "document") HttpRequestMessage<Optional<String>> request,
+            @CosmosDBOutput(name = "document", databaseName = "function-1", containerName = "test", connection = "CosmosDBConnection") OutputBinding<Document> output,
+            final ExecutionContext context) {
         String body = request.getBody().orElse("");
         Document document = new Document("generic", body);
         output.setValue(document);
