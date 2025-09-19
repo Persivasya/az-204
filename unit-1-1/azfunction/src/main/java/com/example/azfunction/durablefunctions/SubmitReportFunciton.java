@@ -16,17 +16,18 @@ import com.microsoft.durabletask.azurefunctions.DurableClientContext;
 import com.microsoft.durabletask.azurefunctions.DurableClientInput;
 
 public class SubmitReportFunciton {
-    @FunctionName("SubmitReportFunciton")
-    public HttpResponseMessage run(
-            @HttpTrigger(name = "req", methods = {
-                    HttpMethod.POST }, authLevel = AuthorizationLevel.ANONYMOUS, route = "submitreport") HttpRequestMessage<Optional<String>> request,
-            @DurableClientInput(name = "durableContxt") DurableClientContext clientContext,
-            final ExecutionContext context) {
-        Report report = new Report(1, "Report 1", "Report 1 description", ReportStatus.PENDING, LocalDateTime.now(),
-                LocalDateTime.now());
+        @FunctionName("SubmitReportFunciton")
+        public HttpResponseMessage run(
+                        @HttpTrigger(name = "req", methods = {
+                                        HttpMethod.POST }, authLevel = AuthorizationLevel.ANONYMOUS, route = "submitreport") HttpRequestMessage<Optional<String>> request,
+                        @DurableClientInput(name = "durableContxt") DurableClientContext clientContext,
+                        final ExecutionContext context) {
+                Report report = new Report(1, "Report 1", "Report 1 description", ReportStatus.PENDING,
+                                LocalDateTime.now(),
+                                LocalDateTime.now());
 
-        DurableTaskClient client = clientContext.getClient();
-        client.scheduleNewOrchestrationInstance("ReportOrchestratorFunction", report);
-        return request.createResponseBuilder(HttpStatus.OK).body("Report pending").build();
-    }
+                DurableTaskClient client = clientContext.getClient();
+                String instanceId = client.scheduleNewOrchestrationInstance("ReportOrchestratorFunction", report);
+                return clientContext.createCheckStatusResponse(request, instanceId);
+        }
 }
