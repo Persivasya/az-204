@@ -8,17 +8,15 @@ public class Report {
     private String name;
     private String description;
     private ReportStatus status;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
 
-    public Report(Integer id, String name, String description, ReportStatus status, LocalDateTime createdAt,
-            LocalDateTime updatedAt) {
+    public Report() {
+    }
+
+    public Report(Integer id, String name, String description, ReportStatus status) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.status = status;
-        this.createdAt = createdAt;
-        this.updatedAt = updatedAt;
     }
 
     public Integer getId() {
@@ -37,11 +35,7 @@ public class Report {
         return status;
     }
 
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
+    public void setStatus(ReportStatus completed) {
+        this.status = completed;
     }
 }

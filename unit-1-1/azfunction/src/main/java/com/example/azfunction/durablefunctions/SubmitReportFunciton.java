@@ -21,9 +21,7 @@ public class SubmitReportFunciton {
                                         HttpMethod.POST }, authLevel = AuthorizationLevel.ANONYMOUS, route = "submitreport") HttpRequestMessage<Optional<String>> request,
                         @DurableClientInput(name = "durableContxt") DurableClientContext clientContext,
                         final ExecutionContext context) {
-                Report report = new Report(1, "Report 1", "Report 1 description", ReportStatus.PENDING,
-                                LocalDateTime.now(),
-                                LocalDateTime.now());
+                Report report = new Report(1, "Report 1", "Report 1 description", ReportStatus.PENDING);
 
                 DurableTaskClient client = clientContext.getClient();
                 String instanceId = client.scheduleNewOrchestrationInstance("ReportOrchestratorFunction", report);
