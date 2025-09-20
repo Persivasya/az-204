@@ -4,5 +4,6 @@ public enum ReportStatus {
     PENDING,
     PROCESSING,
     COMPLETED,
-    FAILED
+    FAILED,
+    REWORK
 }
