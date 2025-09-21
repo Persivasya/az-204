@@ -1,5 +1,6 @@
 package com.example.azfunction.gitwebhook;
 
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.Base64;
 import java.util.Optional;
@@ -30,7 +31,7 @@ public class GitEventLoggerFunction {
         String signature = request.getHeaders().getOrDefault("X-Hub-Signature", "");
         String secret = System.getenv("GIT_SECRET_KEY");
         if (secret.isEmpty() || signature.isBlank()
-                || !verifySha256(request.getBody().orElse("").getBytes(), secret, signature)) {
+                || !verifyGitHubSha1(request.getBody().orElse(""), secret, signature)) {
             return request.createResponseBuilder(HttpStatus.UNAUTHORIZED).body("Unauthorized").build();
         }
 
@@ -41,15 +42,35 @@ public class GitEventLoggerFunction {
         return request.createResponseBuilder(HttpStatus.OK).body(event).build();
     }
 
-    private static boolean verifySha256(byte[] body, String secret, String sigHeader) {
+    static boolean verifyGitHubSha1(String rawBody, String signatureHeader, String secret) {
+        if (signatureHeader == null || !signatureHeader.startsWith("sha1="))
+            return false;
         try {
-            Mac mac = Mac.getInstance("HmacSHA256");
-            mac.init(new SecretKeySpec(Base64.getDecoder().decode(secret), "HmacSHA256"));
-            byte[] hash = mac.doFinal(body);
-            String expected = "sha256=" + Base64.getEncoder().encodeToString(hash);
-            return expected.equals(sigHeader);
+            Mac mac = Mac.getInstance("HmacSHA1");
+            mac.init(new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), "HmacSHA1"));
+            byte[] digest = mac.doFinal(rawBody.getBytes(StandardCharsets.UTF_8));
+
+            String expected = "sha1=" + toHex(digest); // hex lowercase
+            return constantTimeEquals(expected, signatureHeader);
         } catch (Exception e) {
             return false;
         }
     }
+
+    static boolean constantTimeEquals(String a, String b) {
+        if (a == null || b == null)
+            return false;
+        int diff = a.length() ^ b.length();
+        for (int i = 0; i < Math.min(a.length(), b.length()); i++)
+            diff |= a.charAt(i) ^ b.charAt(i);
+        return diff == 0;
+    }
+
+    static String toHex(byte[] bytes) {
+        StringBuilder sb = new StringBuilder(bytes.length * 2);
+        for (byte x : bytes)
+            sb.append(String.format("%02x", x));
+        return sb.toString();
+    }
+
 }
