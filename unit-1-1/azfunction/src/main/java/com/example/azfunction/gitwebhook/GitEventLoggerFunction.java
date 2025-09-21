@@ -2,7 +2,6 @@ package com.example.azfunction.gitwebhook;
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
-import java.util.Base64;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -29,9 +28,10 @@ public class GitEventLoggerFunction {
             @CosmosDBOutput(name = "items", databaseName = "git", containerName = "events", connection = "CosmosDBConnection") OutputBinding<RepoEvent> output,
             final ExecutionContext context) {
         String signature = request.getHeaders().getOrDefault("X-Hub-Signature", "");
+        String signature256 = request.getHeaders().getOrDefault("X-Hub-Signature-256", "");
         String secret = System.getenv("GIT_SECRET_KEY");
         if (secret.isEmpty() || signature.isBlank()
-                || !verifyGitHubSha1(request.getBody().orElse(""), secret, signature)) {
+                || !verifyGithubSignature(request.getBody().orElse(""), signature256, signature, secret, true)) {
             return request.createResponseBuilder(HttpStatus.UNAUTHORIZED).body("Unauthorized").build();
         }
 
@@ -42,18 +42,36 @@ public class GitEventLoggerFunction {
         return request.createResponseBuilder(HttpStatus.OK).body(event).build();
     }
 
-    static boolean verifyGitHubSha1(String rawBody, String signatureHeader, String secret) {
-        if (signatureHeader == null || !signatureHeader.startsWith("sha1="))
+    static boolean verifyGithubSignature(String body, String sig256, String sig1, String secret,
+            boolean allowSha1Fallback) {
+        if (secret == null || secret.isEmpty())
             return false;
-        try {
-            Mac mac = Mac.getInstance("HmacSHA1");
-            mac.init(new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), "HmacSHA1"));
-            byte[] digest = mac.doFinal(rawBody.getBytes(StandardCharsets.UTF_8));
 
-            String expected = "sha1=" + toHex(digest); // hex lowercase
-            return constantTimeEquals(expected, signatureHeader);
+        // Prefer SHA-256
+        if (sig256 != null && sig256.startsWith("sha256=")) {
+            String expected = "sha256=" + hmacHex("HmacSHA256", secret, body);
+            return constantTimeEquals(expected, sig256);
+        }
+
+        // Legacy SHA-1 only if you explicitly allow it
+        if (allowSha1Fallback && sig1 != null && sig1.startsWith("sha1=")) {
+            String expected = "sha1=" + hmacHex("HmacSHA1", secret, body);
+            return constantTimeEquals(expected, sig1);
+        }
+        return false;
+    }
+
+    static String hmacHex(String alg, String key, String data) {
+        try {
+            Mac mac = Mac.getInstance(alg);
+            mac.init(new SecretKeySpec(key.getBytes(StandardCharsets.UTF_8), alg));
+            byte[] out = mac.doFinal(data.getBytes(StandardCharsets.UTF_8));
+            StringBuilder sb = new StringBuilder(out.length * 2);
+            for (byte b : out)
+                sb.append(String.format("%02x", b));
+            return sb.toString();
         } catch (Exception e) {
-            return false;
+            throw new RuntimeException(e);
         }
     }
 
@@ -64,13 +82,6 @@ public class GitEventLoggerFunction {
         for (int i = 0; i < Math.min(a.length(), b.length()); i++)
             diff |= a.charAt(i) ^ b.charAt(i);
         return diff == 0;
-    }
-
-    static String toHex(byte[] bytes) {
-        StringBuilder sb = new StringBuilder(bytes.length * 2);
-        for (byte x : bytes)
-            sb.append(String.format("%02x", x));
-        return sb.toString();
     }
 
 }
