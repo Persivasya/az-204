@@ -43,20 +43,13 @@ public class GitEventLoggerFunction {
 
     private static boolean verifySha256(byte[] body, String secret, String sigHeader) {
         try {
-            Mac mac = Mac.getInstance("HmacSHA1");
-            mac.init(new SecretKeySpec(Base64.getDecoder().decode(secret), "HmacSHA1"));
+            Mac mac = Mac.getInstance("HmacSHA256");
+            mac.init(new SecretKeySpec(Base64.getDecoder().decode(secret), "HmacSHA256"));
             byte[] hash = mac.doFinal(body);
-            String expected = "sha1=" + toHex(hash);
+            String expected = "sha256=" + Base64.getEncoder().encodeToString(hash);
             return expected.equals(sigHeader);
         } catch (Exception e) {
             return false;
         }
-    }
-
-    static String toHex(byte[] bytes) {
-        StringBuilder sb = new StringBuilder(bytes.length * 2);
-        for (byte x : bytes)
-            sb.append(String.format("%02x", x));
-        return sb.toString();
     }
 }
