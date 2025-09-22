@@ -32,6 +32,18 @@
             <artifactId>durabletask-azure-functions</artifactId>
             <version>1.6.0</version>
         </dependency>
+        
+        <dependency>
+            <groupId>com.azure</groupId>
+            <artifactId>azure-cosmos</artifactId>
+            <version>4.74.0</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>com.microsoft.azure.functions</groupId>
+            <artifactId>azure-functions-java-library-signalr</artifactId>
+            <version>1.0.0</version>
+        </dependency>
     </dependencies>
 
     <build>
