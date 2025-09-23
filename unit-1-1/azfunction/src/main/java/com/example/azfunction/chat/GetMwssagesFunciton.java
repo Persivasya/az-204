@@ -19,7 +19,7 @@ public class GetMwssagesFunciton {
         @HttpTrigger(
             name = "req",
             methods = { HttpMethod.GET },
-            authLevel = AuthorizationLevel.FUNCTION
+            authLevel = AuthorizationLevel.ANONYMOUS
         ) HttpRequestMessage<Optional<String>> request,
         @CosmosDBInput(
             name = "items",
