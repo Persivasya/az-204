@@ -11,7 +11,7 @@ public class GetArticleFromQueueFunction {
         @QueueTrigger(
             name = "order",
             queueName = "queue-test",
-            connection = "ServiceBusConnection"
+            connection = "QueueBusConnection"
         ) String message,
         final ExecutionContext context
     ) {
