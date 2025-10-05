@@ -12,8 +12,7 @@ public class StorageService {
     private final BlobServiceClient blobServiceClient;
 
     public StorageService() {
-        String connectioString =
-            "DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=someranname;AccountKey=JslIGqf11msIGD5/9yakCzqX89dKERMurI2gwMazreUedbpyvTuiFE1vxt3QPMlqAzdV1naR/PvM+ASttTRvng==;BlobEndpoint=https://someranname.blob.core.windows.net/;FileEndpoint=https://someranname.file.core.windows.net/;QueueEndpoint=https://someranname.queue.core.windows.net/;TableEndpoint=https://someranname.table.core.windows.net/";
+        String connectioString = "AZURE_STORAGE_CONNECTION_STRING";
         this.blobServiceClient = new BlobServiceClientBuilder()
             .connectionString(connectioString)
             .buildClient();
