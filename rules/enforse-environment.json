@@ -1,0 +1,11 @@
+{
+  "if": {
+    "not": {
+      "field": "tags['environment']",
+      "in": ["Dev", "Test", "Prod"]
+    }
+  },
+  "then": {
+    "effect": "deny"
+  }
+}
